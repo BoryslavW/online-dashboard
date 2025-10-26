@@ -1,10 +1,11 @@
 from pptx import Presentation
 from pptx.util import Inches
-from io import BytesIO
+from io import BytesIO  # This is for PPT and charts—keep it
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import io  # This is for StringIO in CSV download—MOVE IT HERE if it's elsewhere
 import base64  # For chart downloads
 import time    # For progress bar
 
@@ -190,3 +191,4 @@ if uploaded_file is not None:
         )
 else:
     st.info("Please upload a CSV file to analyze.")
+
