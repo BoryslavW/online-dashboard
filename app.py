@@ -1,3 +1,6 @@
+from pptx import Presentation
+from pptx.util import Inches
+from io import BytesIO
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -98,6 +101,61 @@ if uploaded_file is not None:
         data=cleaned_csv.getvalue(),
         file_name="cleaned_company_data.csv",
         mime="text/csv"
+
+    def create_presentation(df, sector_counts, region_counts, size_dist, fig1, fig2, fig3):
+    prs = Presentation()
+    
+    # Title Slide
+    slide_layout = prs.slide_layouts[0]  # Title slide layout
+    slide = prs.slides.add_slide(slide_layout)
+    title = slide.shapes.title
+    subtitle = slide.placeholders[1]
+    title.text = "Company Data Analysis Report"
+    subtitle.text = f"Generated on {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M')}\nTotal Companies: {len(df)}"
+    
+    # Summary Stats Slide
+    slide_layout = prs.slide_layouts[1]  # Title and content
+    slide = prs.slides.add_slide(slide_layout)
+    title = slide.shapes.title
+    title.text = "Summary Statistics"
+    content = slide.placeholders[1]
+    content.text = df.describe(include='all').to_string()  # Simple text summary
+    
+    # Sector Bar Chart Slide
+    slide = prs.slides.add_slide(prs.slide_layouts[1])
+    title = slide.shapes.title
+    title.text = "Top 10 Sectors by Company Count"
+    img_buf = BytesIO()
+    fig1.savefig(img_buf, format='png', bbox_inches='tight')
+    img_buf.seek(0)
+    left = Inches(1)
+    top = Inches(2)
+    slide.shapes.add_picture(img_buf, left, top, height=Inches(4))
+    
+    # Region Pie Chart Slide
+    slide = prs.slides.add_slide(prs.slide_layouts[1])
+    title = slide.shapes.title
+    title.text = "Top 5 Countries Distribution"
+    img_buf = BytesIO()
+    fig2.savefig(img_buf, format='png', bbox_inches='tight')
+    img_buf.seek(0)
+    slide.shapes.add_picture(img_buf, left, top, height=Inches(4))
+    
+    # Size Histogram Slide
+    slide = prs.slides.add_slide(prs.slide_layouts[1])
+    title = slide.shapes.title
+    title.text = "Company Size Category Distribution"
+    img_buf = BytesIO()
+    fig3.savefig(img_buf, format='png', bbox_inches='tight')
+    img_buf.seek(0)
+    slide.shapes.add_picture(img_buf, left, top, height=Inches(4))
+    
+    # Save to buffer for download
+    pptx_buf = BytesIO()
+    prs.save(pptx_buf)
+    pptx_buf.seek(0)
+    return pptx_buf
     )
 else:
+
     st.info("Please upload a CSV file to analyze.")
